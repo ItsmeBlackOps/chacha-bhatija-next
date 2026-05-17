@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+@theme {
+  --color-bg: #050207;
+  --color-bg-panel: #0c060a;
+  --color-bg-glass: rgba(8, 3, 6, 0.72);
+  --color-red: #c11a26;
+  --color-red-bright: #e63946;
+  --color-red-deep: #6b0f15;
+  --color-red-glow: rgba(230, 57, 70, 0.35);
+  --color-green: #5cd297;
+  --color-amber: #d18a2c;
+  --color-blue: #4a90e2;
+  --color-text: #e8e0e2;
+  --color-text-muted: #9d8589;
+  --color-text-dim: #5a4248;
+  --color-border: rgba(255, 255, 255, 0.08);
+  --color-border-soft: rgba(255, 255, 255, 0.05);
+  --color-border-strong: rgba(255, 255, 255, 0.14);
+
+  --font-display: var(--font-display), 'Oswald', sans-serif;
+  --font-display-alt: var(--font-display-alt), 'Oswald', sans-serif;
+  --font-mono: var(--font-mono), 'JetBrains Mono', monospace;
+  --font-body: var(--font-body), 'IBM Plex Sans', sans-serif;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  ::selection {
+    background: rgba(193, 26, 38, 0.4);
+    color: #fff;
+  }
+
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(193, 26, 38, 0.25);
+    border-radius: 999px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(193, 26, 38, 0.5);
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply relative inline-flex items-center gap-3 px-7 py-3.5 bg-gradient-to-b from-[#c11a26] to-[#6b0f15] border border-[#e63946] text-white font-[family-name:var(--font-display)] text-sm font-semibold tracking-[0.28em] uppercase rounded-sm cursor-pointer overflow-hidden transition-transform duration-200;
+    box-shadow: 0 0 24px rgba(230, 57, 70, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  }
+
+  .btn-primary:hover {
+    @apply -translate-y-0.5;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center gap-1.5 bg-transparent border border-[rgba(255,255,255,0.08)] px-4 py-3 text-[#9d8589] font-[family-name:var(--font-mono)] text-[10px] tracking-[0.28em] uppercase cursor-pointer rounded-sm transition-colors duration-150;
+  }
+
+  .btn-ghost:hover {
+    @apply text-[#e8e0e2] border-[rgba(255,255,255,0.14)];
+  }
+
+  .field-input {
+    @apply w-full bg-black/45 border border-[rgba(255,255,255,0.05)] px-3.5 py-3 text-[#e8e0e2] font-[family-name:var(--font-mono)] text-sm rounded-sm outline-none transition-all duration-150;
+  }
+
+  .field-input:focus {
+    @apply border-[#c11a26];
+    box-shadow: 0 0 0 3px rgba(193, 26, 38, 0.15);
+  }
+
+  .chip {
+    @apply inline-flex items-center gap-2 px-3 py-2 border border-[rgba(255,255,255,0.08)] bg-black/40 rounded-sm font-[family-name:var(--font-mono)] text-[10px] tracking-[0.24em] uppercase text-[#9d8589];
+  }
+
+  .chip-dot {
+    @apply w-1.5 h-1.5 rounded-full bg-[#5cd297];
+  }
+
+  .panel {
+    @apply border border-[rgba(255,255,255,0.08)] bg-[#0c060a] rounded overflow-hidden;
+  }
+
+  .panel-head {
+    @apply flex items-center justify-between px-4 py-3 border-b border-[rgba(255,255,255,0.05)];
+  }
+
+  .tag {
+    @apply inline-flex items-center px-2 py-0.5 rounded-sm font-[family-name:var(--font-mono)] text-[10px] tracking-wider uppercase border;
+  }
+
+  .tag-repair {
+    @apply border-[#4a90e2] text-[#4a90e2] bg-[rgba(74,144,226,0.08)];
+  }
+
+  .tag-tow {
+    @apply border-[#d18a2c] text-[#d18a2c] bg-[rgba(209,138,44,0.08)];
+  }
+
+  .tag-impound {
+    @apply border-[#c11a26] text-[#e63946] bg-[rgba(193,26,38,0.08)];
+  }
+
+  .tag-wash {
+    @apply border-[#5cd297] text-[#5cd297] bg-[rgba(92,210,151,0.08)];
+  }
+
+  .tag-paid {
+    @apply border-[#5cd297] text-[#5cd297] bg-[rgba(92,210,151,0.08)];
+  }
+
+  .tag-unpaid {
+    @apply border-[#d18a2c] text-[#d18a2c] bg-[rgba(209,138,44,0.08)];
+  }
+}

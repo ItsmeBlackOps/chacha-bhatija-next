@@ -1,0 +1,213 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  OWNER
+  MANAGER
+  DISPATCHER
+  MECHANIC
+  TOW_DRIVER
+}
+
+enum JobType {
+  REPAIR
+  TOW
+  IMPOUND
+  WASH
+  ROADSIDE
+}
+
+enum Urgency {
+  CRITICAL
+  HIGH
+  STANDARD
+  LOW
+}
+
+enum JobStatus {
+  PENDING
+  EN_ROUTE
+  IN_PROGRESS
+  COMPLETE
+  HOLDING
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  INVOICE
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String    @map("password_hash")
+  role         UserRole  @default(MECHANIC)
+  name         String
+  phone        String?
+  avatar       String?
+  createdAt    DateTime  @default(now()) @map("created_at")
+  updatedAt    DateTime  @updatedAt @map("updated_at")
+
+  staff        Staff?
+  activityLogs ActivityLog[]
+  privateRecords PrivateRecord[]
+
+  @@map("users")
+}
+
+model Staff {
+  id        String    @id @default(cuid())
+  userId    String    @unique @map("user_id")
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  badge     String    @unique
+  role      UserRole
+  unit      String?
+  onDuty    Boolean   @default(false) @map("on_duty")
+  status    String    @default("active")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  jobs      Job[]
+
+  @@map("staff")
+}
+
+model Customer {
+  id        String    @id @default(cuid())
+  name      String
+  phone     String
+  email     String?
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  vehicles  Vehicle[]
+
+  @@map("customers")
+}
+
+model Vehicle {
+  id        String    @id @default(cuid())
+  plate     String    @unique
+  model     String
+  color     String?
+  ownerId   String    @map("owner_id")
+  owner     Customer  @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@map("vehicles")
+}
+
+model Job {
+  id            String     @id @default(cuid())
+  type          JobType
+  urgency       Urgency    @default(STANDARD)
+  status        JobStatus  @default(PENDING)
+  
+  // Vehicle info (can be filled by guest booking)
+  plate         String?
+  vehicleDesc   String?    @map("vehicle_desc")
+  
+  // Location & notes
+  location      String?
+  notes         String?
+  
+  // Customer info (guest bookings use these directly)
+  customerName  String     @map("customer_name")
+  customerPhone String     @map("customer_phone")
+  
+  // Assignment
+  staffId       String?    @map("staff_id")
+  staff         Staff?     @relation(fields: [staffId], references: [id])
+  
+  // Financial
+  amount        Int?       // cents
+  paid          Boolean    @default(false)
+  
+  createdAt     DateTime   @default(now()) @map("created_at")
+  updatedAt     DateTime   @updatedAt @map("updated_at")
+
+  payments      Payment[]
+
+  @@map("jobs")
+}
+
+model Impound {
+  id          String    @id @default(cuid())
+  plate       String
+  model       String
+  owner       String
+  authBy      String    @map("auth_by")
+  date        DateTime  @default(now())
+  held        Boolean   @default(true)
+  released    Boolean   @default(false)
+  releasedAt  DateTime? @map("released_at")
+  releaseFee  Int?      @map("release_fee") // cents
+  auditTrail  String    @default("[]") @map("audit_trail") // JSON string
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  @@map("impounds")
+}
+
+model Inventory {
+  id            String   @id @default(cuid())
+  sku           String   @unique
+  name          String
+  stock         Int      @default(0)
+  maxStock      Int      @map("max_stock")
+  cost          Int      // cents
+  sell          Int      // cents
+  lowThreshold  Int      @default(5) @map("low_threshold")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@map("inventory")
+}
+
+model Payment {
+  id        String        @id @default(cuid())
+  jobId     String        @map("job_id")
+  job       Job           @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  amount    Int           // cents
+  method    PaymentMethod @default(CASH)
+  status    PaymentStatus @default(PENDING)
+  createdAt DateTime      @default(now()) @map("created_at")
+
+  @@map("payments")
+}
+
+model ActivityLog {
+  id          String   @id @default(cuid())
+  type        String   // e.g. "JOB_CREATED", "IMPOUND_RELEASED"
+  recordId    String?  @map("record_id")
+  description String
+  actorId     String   @map("actor_id")
+  actor       User     @relation(fields: [actorId], references: [id])
+  metadata    String?  // JSON string for before/after snapshots
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("activity_logs")
+}
+
+model PrivateRecord {
+  id          String   @id @default(cuid())
+  title       String
+  content     String
+  tags        String[] // e.g. ["favor", "debt", "hidden-note"]
+  createdById String   @map("created_by_id")
+  createdBy   User     @relation(fields: [createdById], references: [id])
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@map("private_records")
+}
